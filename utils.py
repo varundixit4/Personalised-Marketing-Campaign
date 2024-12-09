@@ -10,30 +10,24 @@ from dotenv import load_dotenv
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 
-# Load the K-Means model
 def load_model(model_path):
     return joblib.load(model_path)
 
-# Load dataset
 def load_data(data_path):
     df = pd.read_csv(data_path)
     return df[['Gender', 'Loyalty Member', 'Age', 'Recency', 'Frequency', 'Monetary', 
                'Churn', 'Total Orders', 'Cancellation Rate', 'Add-on Frequency']]
 
-# Preprocess input data
 def preprocess_input(df, input_data):
-    # Define binary encoding function
     def binary_encode(df):
         return df.replace({'Male': 0, 'Female': 1, 'Yes': 1, 'No': 0})
 
-    # Define feature sets
     binary_features = ['Gender', 'Loyalty Member', 'Churn']
     numerical_features = [
         'Age', 'Recency', 'Frequency', 'Monetary', 
         'Total Orders', 'Cancellation Rate', 'Add-on Frequency'
     ]
 
-    # Define the transformation pipeline
     binary_pipeline = Pipeline(steps=[
         ('binary_encoder', FunctionTransformer(binary_encode, validate=False))
     ])
@@ -42,7 +36,6 @@ def preprocess_input(df, input_data):
         ('scaler', StandardScaler())
     ])
 
-    # Apply transformations in the correct order
     preprocessor = ColumnTransformer(
         transformers=[
             ('binary', binary_pipeline, binary_features),
@@ -51,7 +44,6 @@ def preprocess_input(df, input_data):
         remainder='drop'
     )
 
-    # Fit the pipeline on the existing dataset
     final_pipeline = Pipeline(steps=[
         ('preprocessor', preprocessor)
     ])
