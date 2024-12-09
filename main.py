@@ -1,10 +1,17 @@
+import google.generativeai as genai
 import streamlit as st
 import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
 from sklearn.compose import ColumnTransformer
 import joblib
+from dotenv import load_dotenv
+import os
+
 pd.set_option('future.no_silent_downcasting', True)
+
+load_dotenv()
+api_key = os.getenv("GEMINI_API_KEY")
 
 # Load the K-Means model
 kmeans = joblib.load("./models/kmeans_model.pkl")
@@ -16,7 +23,7 @@ df = df[['Gender', 'Loyalty Member', 'Age', 'Recency', 'Frequency', 'Monetary',
 
 # Streamlit UI
 st.title("Customer Segmentation Tool")
-st.subheader("Enter customer details to predict the segment")
+st.subheader("Enter customer details to predict the segment and generate personalized email")
 
 # Input fields
 gender = st.selectbox("Gender", ["Male", "Female"])
@@ -160,12 +167,47 @@ try:
 except Exception as e:
     st.error(f"Error during preprocessing: {e}")
 
+# Function to generate email using OpenAI
+def generate_email(input_details, cluster_info):
+
+    genai.configure(api_key=api_key)
+
+    prompt = f"""
+    You are an expert marketing email copywriter. Create a personalized marketing email based on the following details:
+    
+    Customer Details:
+    {input_details}
+    
+    Cluster Characteristics:
+    {cluster_info["Characteristics"]}
+    
+    Behavior:
+    {cluster_info["Behavior"]}
+    
+    Campaign Strategy:
+    {cluster_info["Campaign Strategy"]}
+    
+    Make the email engaging, personalized, and designed to maximize ROI. Only generate the email and nothing else.
+    """
+
+    try:
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(f"{prompt}")
+        return response.text
+    except Exception as e:
+        st.error(f"Error during email generation: {e}")
+        return None
+
 # Predict and display results
-if st.button("Predict Segment"):
+if st.button("Generate Email"):
     try:
         segment = kmeans.predict(processed_data)
         st.success(f"The customer belongs to Segment: {segment[0]}")
-        st.write(f"Behavior: {cluster_lookup[segment[0]]['Behavior']}")
-        st.write(f"Campaign Strategy: {cluster_lookup[segment[0]]['Campaign Strategy']}")
+        cluster_info = cluster_lookup[segment[0]]
+
+        email = generate_email(input_data.to_dict(orient="records")[0], cluster_info)
+        if email:
+            st.subheader("Generated Email:")
+            st.write(email)
     except Exception as e:
         st.error(f"Error during prediction: {e}")
