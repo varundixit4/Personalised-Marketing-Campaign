@@ -38,7 +38,24 @@ This tool streamlines the marketing process, ensuring businesses can deliver hig
 - A sleek and intuitive **Streamlit** interface allows marketers to:  
    - Upload customer data.  
    - Generate personalized marketing strategies.  
-   - Generate tailored email content ready for outreach with a few tweeks.  
+   - Generate tailored email content ready for outreach with a few tweeks.
+
+## **Gallery** 📷
+
+### **1. User Interface**
+![user-interface](Gallery/UI.png)
+
+### **2. Predict Segment**
+![predict-segment](Gallery/Predict-Segment.png)
+
+### **3. Generate Strategy**
+![generate-strategy](Gallery/Generate-Strategy.png)
+
+### **4. Generate Email**
+![generate-email](Gallery/Generate-Email.png)
+
+
+
 
 ## **How to Run the Project** ▶️  
 
